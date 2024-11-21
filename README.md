@@ -93,7 +93,7 @@ Polygons defining the boundaries of **planning areas** and **subzones** in Singa
 
 ---
 
-### **Step 3: Define Income Strata by Property Prices**
+### **Step 3: Define Income Strata by Property Prices (or use linear regression?)**
 1. **Input**:
    - Property prices and income distributions from Steps 1 and 2.
 
