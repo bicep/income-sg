@@ -59,12 +59,15 @@ Polygons defining the boundaries of **planning areas** and **subzones** in Singa
 
 3. **Output**:
    - For `property_prices.csv`:
-     | Lat      | Lon      | median_price_per_sqm | housing_type | Planning Area  | Subzone       |
-     |----------|----------|----------------------|--------------|----------------|---------------|
-     | 1.2951   | 103.8541 | 5190.35             | public       | Marina South   | Marina Centre |
+     | latitude        | longitude          | median_price_per_sqm | mean_price_per_sqm | housing_type | Planning Area  | Subzone       |
+     |------------|--------------|----------------------|---------------------|--------------|----------------|---------------|
+     | 1.295097   | 103.854068   | 5190.35             | 5388.66            | public       | DOWNTOWN CORE  | CITY HALL     |
+     | 1.320852   | 103.933721   | 5254.24             | 5331.65            | public       | BEDOK          | BEDOK SOUTH   |
+     | 1.327969   | 103.922716   | 4165.41             | 4282.90            | public       | BEDOK          | KEMBANGAN     |
+
 
    - For `population_density.csv`:
-     | Lat      | Lon      | Population Density | Planning Area  | Subzone       |
+     | latitude      | longitude      | Population Density | Planning Area  | Subzone       |
      |----------|----------|--------------------|----------------|---------------|
      | 1.3521   | 103.8198 | 500                | Bishan         | Marymount     |
 
