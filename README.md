@@ -5,37 +5,50 @@ This project generates ~100,000 synthetic individual-level data points for Singa
 - **Geographic realism**: Accurate latitude/longitude coordinates based on high-resolution population density data.
 - **Socioeconomic diversity**: Income and housing type distributions aligned with property prices and planning area data.
 
+---
+
 ## **Datasets**
-### **Input Datasets**
-1. **Income Data (`income.csv`)**  
-   - Contains income statistics at the planning area level.  
-   - Example:
-     | Planning Area  | Median Income | Mean Income | StdDev Income |
-     |----------------|---------------|-------------|---------------|
-     | Marina South   | 8000          | 8500        | 1500          |
+### **1. Income Data (`income.csv`)**
+Contains income distributions at the planning area level. Each planning area has total households and counts in income brackets.
 
-2. **Population Density Data (`population_density.csv`)**  
-   - High-resolution dataset (~90,000 rows) with latitude/longitude and population density.  
-   - Example:
-     | Lat      | Lon      | Population Density |
-     |----------|----------|--------------------|
-     | 1.3521   | 103.8198 | 500                |
+**Example:**
+| Planning Area  | Total   | No Working Person | Below $1,000 | $1,000–$1,999 | $2,000–$2,999 | ... | $20,000 & Over |
+|----------------|---------|-------------------|--------------|---------------|---------------|-----|----------------|
+| Total          | 1,225.3 | 118.8            | 24.0         | 70.0          | 70.6          | ... | 148.6          |
+| Ang Mo Kio     | 62.6    | 8.7              | 2.1          | 5.4           | 4.4           | ... | 6.1            |
 
-3. **Property Prices Data**  
-   - **HDB Property Prices (`hdb_property_prices.csv`)** and **Private Property Prices (`private_property_prices.csv`)**:
-     - Contain property prices, housing types, and lat/lon values.  
-     - Example:
-       | Lat      | Lon      | Address              | Avg Price    | Housing Type     |
-       |----------|----------|----------------------|--------------|------------------|
-       | 1.3521   | 103.8198 | "Blk 123 Bishan St"  | 500,000      | HDB             |
-       | 1.3532   | 103.8201 | "Marina Tower 1"     | 2,500,000    | Private Property |
+---
 
-4. **GeoJSON Files**  
-   - **Planning Areas GeoJSON** and **Subzones GeoJSON**: Polygons defining planning areas and subzones in Singapore.
+### **2. Population Density Data (`population_density.csv`)**
+High-resolution dataset (~90,000 rows) containing latitude/longitude and associated population density.
+
+**Example:**
+| Lat      | Lon      | Population Density |
+|----------|----------|--------------------|
+| 1.3521   | 103.8198 | 500                |
+| 1.2951   | 103.8541 | 200                |
+
+---
+
+### **3. Property Prices Data**
+Contains property price information, housing types, and lat/lon values.
+
+**Example:**
+| full_address         | median_price_per_sqm | mean_price_per_sqm | housing_type | latitude     | longitude     |
+|----------------------|-----------------------|---------------------|--------------|--------------|---------------|
+| 1 BEACH RD           | 5190.35              | 5388.66            | public       | 1.2951       | 103.8541      |
+| 1 BEDOK STH AVE 1    | 5254.24              | 5331.65            | public       | 1.3209       | 103.9337      |
+| 1 DELTA AVE          | 7310.92              | 7280.62            | public       | 1.2921       | 103.8286      |
+
+---
+
+### **GeoJSON Files**
+Polygons defining the boundaries of **planning areas** and **subzones** in Singapore.
 
 ---
 
 ## **Process**
+
 ### **Step 1: Spatially Join Lat/Lon to Planning Areas and Subzones**
 1. **Input**:
    - `hdb_property_prices.csv`, `private_property_prices.csv`, and `population_density.csv`.
@@ -46,53 +59,67 @@ This project generates ~100,000 synthetic individual-level data points for Singa
 
 3. **Output**:
    - For `property_prices.csv`:
-     | Lat      | Lon      | Avg Price    | Housing Type     | Planning Area  | Subzone       |
-     |----------|----------|--------------|------------------|----------------|---------------|
-     | 1.3521   | 103.8198 | 500,000      | HDB             | Bishan         | Marymount     |
-     | 1.3532   | 103.8201 | 2,500,000    | Private Property | Marina South   | Marina Centre |
+     | Lat      | Lon      | median_price_per_sqm | housing_type | Planning Area  | Subzone       |
+     |----------|----------|----------------------|--------------|----------------|---------------|
+     | 1.2951   | 103.8541 | 5190.35             | public       | Marina South   | Marina Centre |
 
    - For `population_density.csv`:
      | Lat      | Lon      | Population Density | Planning Area  | Subzone       |
      |----------|----------|--------------------|----------------|---------------|
      | 1.3521   | 103.8198 | 500                | Bishan         | Marymount     |
-     | 1.3543   | 103.8212 | 800                | Marina South   | Marina Centre |
 
 ---
 
-### **Step 2: Define Income Strata by Planning Area**
+### **Step 2: Extract Income Distributions by Planning Area**
 1. **Input**:
-   - `income.csv` and spatially joined `property_prices.csv`.
+   - `income.csv` (income bracket counts at the planning area level).
+   - Spatially joined property price data from Step 1.
 
 2. **Action**:
    - For each planning area:
-     1. Divide property prices into **low**, **medium**, and **high strata** (relative to the planning area):
-        - Low: Bottom 25%.
-        - Medium: Middle 50%.
-        - High: Top 25%.
-     2. Map income ranges from `income.csv` to these strata:
-        - Low prices → Lower quartiles of income.
-        - Medium prices → Around the median income.
-        - High prices → Upper quartiles of income.
+     - Normalize income bracket counts to get probability distributions (e.g., percentage of households in each bracket).
+     - Example for Ang Mo Kio:
+       | Income Bracket     | Count | Percentage |
+       |--------------------|-------|------------|
+       | Below $1,000       | 2.1   | 3.4%       |
+       | $1,000–$1,999      | 5.4   | 8.6%       |
+       | ...                | ...   | ...        |
 
 3. **Output**:
-   | Planning Area  | Subzone       | Price Range  | Income Range       |
-   |----------------|---------------|--------------|--------------------|
-   | Bishan         | Marymount     | Medium       | $4,000–$8,000      |
-   | Marina South   | Marina Centre | High         | $8,000–$20,000     |
+   - Income probability distributions for each planning area.
 
 ---
 
-### **Step 3: Generate Synthetic Individuals**
+### **Step 3: Define Income Strata by Property Prices**
 1. **Input**:
-   - Spatially joined `population_density.csv`.
-   - Income strata and ranges from Step 2.
+   - Property prices and income distributions from Steps 1 and 2.
+
+2. **Action**:
+   - For each planning area:
+     - Divide property prices into **low**, **medium**, and **high** strata (e.g., bottom 25%, middle 50%, top 25%).
+     - Map these strata to corresponding income brackets.
+       - Low price → Lower income brackets.
+       - Medium price → Middle income brackets.
+       - High price → Higher income brackets.
+
+3. **Output**:
+   | Planning Area  | Subzone       | Price Stratum  | Income Bracket Distribution |
+   |----------------|---------------|----------------|-----------------------------|
+   | Bishan         | Marymount     | Medium         | $4,000–$8,000              |
+
+---
+
+### **Step 4: Generate Synthetic Individuals**
+1. **Input**:
+   - Population density data from Step 1.
+   - Income distributions and property price strata from Steps 2 and 3.
 
 2. **Action**:
    - **Proportional Sampling**:
      - Use population density as weights to determine how many synthetic individuals to generate per lat/lon point.
    - **Assign Attributes**:
      - For each individual:
-       - **Income**: Sample from the income range based on the planning area and price stratum.
+       - **Income**: Sample from the income distribution corresponding to the planning area and price stratum.
        - **Housing Type**: Assign based on the subzone’s housing composition.
    - **Jitter Lat/Lon**:
      - Add small random offsets (e.g., ±0.0002 degrees) to each lat/lon for spatial variability.
@@ -105,9 +132,9 @@ This project generates ~100,000 synthetic individual-level data points for Singa
 
 ---
 
-### **Step 4: Validation**
+### **Step 5: Validation**
 1. **Aggregate Synthetic Data**:
-   - Summarize income data by planning area and compare to `income.csv` statistics (mean, median, stddev).
+   - Summarize income data by planning area and compare to `income.csv` statistics (mean, median, and bracket distributions).
 
 2. **Visualize**:
    - Compare income distributions using histograms or density plots.
@@ -136,8 +163,3 @@ This project generates ~100,000 synthetic individual-level data points for Singa
 ## **Next Steps**
 - Implement the workflow in Python.
 - Validate and iterate based on the synthetic data outputs.
-
----
-
-Feel free to suggest edits or enhancements!
-

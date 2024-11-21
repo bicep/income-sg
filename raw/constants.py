@@ -1,0 +1,1 @@
+ONEMAP_SEARCH_BASE_URL = "https://www.onemap.gov.sg/api/common/elastic/search"
