@@ -1,7 +1,7 @@
-# Synthetic High-Resolution Income Data Generation for Singapore
+# Generating Synthetic Income Data for Singapore
 
 ## **Overview**
-This project generates ~100,000 synthetic individual-level data points for Singapore, capturing:
+This project generates ~40,000 income data points for Singapore on a 50mx50m geospatial grid, capturing:
 - **Geographic realism**: Accurate latitude/longitude coordinates based on high-resolution population density data.
 - **Socioeconomic diversity**: Income and housing type distributions aligned with property prices and planning area data.
 
@@ -73,96 +73,62 @@ Polygons defining the boundaries of **planning areas** and **subzones** in Singa
 
 ---
 
-### **Step 2: Extract Income Distributions by Planning Area**
+### **Step 2: Extract cumulative Income Distributions by Planning Area**
 1. **Input**:
    - `income.csv` (income bracket counts at the planning area level).
+
+2. **Action**:
+   - For each planning area:
+     - Normalize income bracket counts to calculate cumulative probability distributions across income brackets.
+     - Example table for cumulative probabilities:
+       | Planning Area  | 0–$1,000 | $1,000–$1,999 | $2,000–$2,999 | $3,000–$3,999 | ... | $20,000 and Over |
+       |----------------|-----------|---------------|---------------|---------------|-----|-------------------|
+       | Ang Mo Kio     | 0.0       | 0.1165        | 0.1737        | 0.2313        | ... | 1.0               |
+
+3. **Output**:
+   - Cumulative income probability distributions for each planning area. 
+
+---
+
+### **Step 3: Interpolate Property Prices**
+1. **Input**:
+   - Property prices from Step 1.
+   - WorldPop's Singapore population density dataset on a 50mx50m grid.
    - Spatially joined property price data from Step 1.
 
 2. **Action**:
    - For each planning area:
-     - Normalize income bracket counts to get probability distributions (e.g., percentage of households in each bracket).
-     - Example for Ang Mo Kio:
-       | Income Bracket     | Count | Percentage |
-       |--------------------|-------|------------|
-       | Below $1,000       | 2.1   | 3.4%       |
-       | $1,000–$1,999      | 5.4   | 8.6%       |
-       | ...                | ...   | ...        |
+     - Interpolate property prices onto the 50mx50m population density grid using **Inverse Distance Weighting (IDW)** with the 30 nearest neighbors.
+     - Combine property prices and population density for each grid cell.
 
 3. **Output**:
-   - Income probability distributions for each planning area.
+   - Interpolated dataset including latitude, longitude, population density, planning area, subzone, and combined interpolated property price:
+     | latitude          | longitude         | popDensity | planning_area | subzone       | combined_price       |
+     |-------------------|-------------------|------------|---------------|---------------|----------------------|
+     | 1.4700001956757494 | 103.80666626685638 | 68.958855  | SEMBAWANG     | SENOKO NORTH  | 4204.512752593874    |
+     | 1.4700001956757494 | 103.80749960018618 | 69.520256  | SEMBAWANG     | SENOKO NORTH  | 4199.010361248807    |
+     | 1.4700001956757494 | 103.80833293351596 | 77.01106   | SEMBAWANG     | SENOKO NORTH  | 4198.972551019158    |
+     | 1.4700001956757494 | 103.80916626684576 | 76.935555  | SEMBAWANG     | SENOKO NORTH  | 4198.752810573111    |
 
 ---
 
-### **Step 3: Define Income Strata by Property Prices (or use linear regression?)**
+### **Step 4: Stratify Property Prices and Assign Income Brackets**
 1. **Input**:
-   - Property prices and income distributions from Steps 1 and 2.
+   - Interpolated property prices and grid data from Step 3.
+   - Income distributions from Step 2.
 
 2. **Action**:
-   - For each planning area:
-     - Divide property prices into **low**, **medium**, and **high** strata (e.g., bottom 25%, middle 50%, top 25%).
-     - Map these strata to corresponding income brackets.
-       - Low price → Lower income brackets.
-       - Medium price → Middle income brackets.
-       - High price → Higher income brackets.
+   - Stratify the interpolated property prices into **exponential deciles** to better capture the variability in property values across the planning area.
+   - Assign each decile to a corresponding income bracket based on the income distribution of the planning area.
+   - Remove subzones that are likely to be non-residential by excluding grid cells with low population density or identified as non-residential zones.
 
 3. **Output**:
-   | Planning Area  | Subzone       | Price Stratum  | Income Bracket Distribution |
-   |----------------|---------------|----------------|-----------------------------|
-   | Bishan         | Marymount     | Medium         | $4,000–$8,000              |
+   - Final dataset with planning area, subzone, grid latitude/longitude, property price, price decile, income bracket, population density, and average income:
+     | planning_area | subzone       | latitude          | longitude         | property_price       | price_decile | income_bracket | popDensity | average_income       |
+     |---------------|---------------|-------------------|-------------------|----------------------|--------------|----------------|------------|---------------------|
+     | SEMBAWANG     | SENOKO NORTH  | 1.4700001956757494 | 103.80666626685638 | 4204.512752593874    | 0            | 2000_2999      | 68.958855  | 2656.0776596962532  |
+     | SEMBAWANG     | SENOKO NORTH  | 1.4700001956757494 | 103.80749960018618 | 4199.010361248807    | 0            | 2000_2999      | 69.520256  | 2166.090143105685   |
+     | SEMBAWANG     | SENOKO NORTH  | 1.4700001956757494 | 103.80833293351596 | 4198.972551019158    | 0            | 2000_2999      | 77.01106   | 2354.7126467157277  |
+     | SEMBAWANG     | SENOKO NORTH  | 1.4700001956757494 | 103.80916626684576 | 4198.752810573111    | 0            | 2000_2999      | 76.935555  | 2635.9373489898626  |
 
 ---
-
-### **Step 4: Generate Synthetic Individuals**
-1. **Input**:
-   - Population density data from Step 1.
-   - Income distributions and property price strata from Steps 2 and 3.
-
-2. **Action**:
-   - **Proportional Sampling**:
-     - Use population density as weights to determine how many synthetic individuals to generate per lat/lon point.
-   - **Assign Attributes**:
-     - For each individual:
-       - **Income**: Sample from the income distribution corresponding to the planning area and price stratum.
-       - **Housing Type**: Assign based on the subzone’s housing composition.
-   - **Jitter Lat/Lon**:
-     - Add small random offsets (e.g., ±0.0002 degrees) to each lat/lon for spatial variability.
-
-3. **Output**:
-   | ID   | Lat       | Lon        | Planning Area  | Subzone       | Income | Housing Type     |
-   |------|-----------|------------|----------------|---------------|--------|------------------|
-   | 1    | 1.352103  | 103.819789 | Bishan         | Marymount     | 6,500  | HDB             |
-   | 2    | 1.354219  | 103.820125 | Marina South   | Marina Centre | 15,000 | Private Property |
-
----
-
-### **Step 5: Validation**
-1. **Aggregate Synthetic Data**:
-   - Summarize income data by planning area and compare to `income.csv` statistics (mean, median, and bracket distributions).
-
-2. **Visualize**:
-   - Compare income distributions using histograms or density plots.
-   - Map synthetic individuals to ensure alignment with population density and property price patterns.
-
----
-
-## **Why This Approach Works**
-1. **Geographic Realism**:
-   - Leverages high-resolution lat/lon points from `population_density.csv` and accurate planning area/subzone boundaries.
-
-2. **Socioeconomic Fidelity**:
-   - Stratifies property prices relative to planning areas, ensuring income diversity reflects local context.
-
-3. **Validation-Ready**:
-   - Synthetic data is aligned with ground truth statistics in `income.csv`.
-
----
-
-## **Tools and Techniques**
-- **Spatial Analysis**: GeoPandas (Python), QGIS, or ArcGIS for spatial joins.
-- **Data Validation**: Pandas, Matplotlib, or Seaborn for analysis and visualization.
-
----
-
-## **Next Steps**
-- Implement the workflow in Python.
-- Validate and iterate based on the synthetic data outputs.
