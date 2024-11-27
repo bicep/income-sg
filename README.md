@@ -1,13 +1,13 @@
 # Generating Synthetic Income Data for Singapore
 
 ## **Overview**
-This project generates ~40,000 income data points for Singapore on a 50mx50m geospatial grid using:
+This project generates ~40,000 income data points for Singapore on a 100mx100m geospatial grid using:
 - **Public /private property prices** (obtained from data.gov.sg, URA) as a proxy for income
 - **Income data aggregated by planning area** (obtained from the Department of Statistics) for broad planning area income distributions
-- **Population density 50mx50m** (obtained from WorldPop) for generation of 50mx50m grid and removal of non-residential interpolated points
+- **Population density 100mx100m** (obtained from WorldPop) for generation of 100mx100m grid and removal of non-residential interpolated points
 
 ![Singapore Income Grid](images/estimated_income.png "Estimated Income based on property price")
-*Visualization of estimated income distribution based on property prices over a 50m x 50m grid for Singapore.*
+*Visualization of estimated income distribution based on property prices over a 100m x 100m grid for Singapore.*
 <!-- ![Singapore Income Grid](images/property_prices.png "Property Price Visualization")
 *Figure 2: Visualization of mean property price per square meter from HDB and private properties in Singapore.* -->
 
@@ -99,12 +99,12 @@ Polygons defining the boundaries of **planning areas** and **subzones** in Singa
 ### **Step 3: Interpolate Property Prices**
 1. **Input**:
    - Property prices from Step 1.
-   - WorldPop's Singapore population density dataset on a 50mx50m grid.
+   - WorldPop's Singapore population density dataset on a 100mx100m grid.
    - Spatially joined property price data from Step 1.
 
 2. **Action**:
    - For each planning area:
-     - Interpolate property prices onto the 50mx50m population density grid using **Inverse Distance Weighting (IDW)** with the 30 nearest neighbors.
+     - Interpolate property prices onto the 100mx100m population density grid using **Inverse Distance Weighting (IDW)** with the 30 nearest neighbors.
      - Combine property prices and population density for each grid cell.
 
 3. **Output**:
