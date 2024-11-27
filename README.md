@@ -1,9 +1,10 @@
 # Generating Synthetic Income Data for Singapore
 
 ## **Overview**
-This project generates ~40,000 income data points for Singapore on a 50mx50m geospatial grid, capturing:
-- **Geographic realism**: Accurate latitude/longitude coordinates based on high-resolution population density data.
-- **Socioeconomic diversity**: Income and housing type distributions aligned with property prices and planning area data.
+This project generates ~40,000 income data points for Singapore on a 50mx50m geospatial grid using:
+- **Public /private property prices** (obtained from data.gov.sg, URA) as a proxy for income
+- **Income data aggregated by planning area** (obtained from the Department of Statistics) for broad planning area income distributions
+- **Population density 50mx50m** (obtained from WorldPop) for generation of 50mx50m grid and removal of non-residential interpolated points
 
 ![Singapore Income Grid](images/estimated_income.png "Estimated Income based on property price")
 *Visualization of estimated income distribution based on property prices over a 50m x 50m grid for Singapore.*
