@@ -1,5 +1,10 @@
 # Generating Synthetic Income Data for Singapore
 
+![Singapore Income Grid](images/estimated_income.png "Estimated Income based on property price")
+*Figure 1: Visualization of estimated income distribution based on property prices over a 50m x 50m grid for Singapore.*
+![Singapore Income Grid](images/property_prices.png "Property Price Visualization")
+*Figure 2: Visualization of mean property price per square meter from HDB and private properties in Singapore.*
+
 ## **Overview**
 This project generates ~40,000 income data points for Singapore on a 50mx50m geospatial grid, capturing:
 - **Geographic realism**: Accurate latitude/longitude coordinates based on high-resolution population density data.
