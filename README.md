@@ -6,9 +6,9 @@ This project generates ~40,000 income data points for Singapore on a 50mx50m geo
 - **Socioeconomic diversity**: Income and housing type distributions aligned with property prices and planning area data.
 
 ![Singapore Income Grid](images/estimated_income.png "Estimated Income based on property price")
-*Figure 1: Visualization of estimated income distribution based on property prices over a 50m x 50m grid for Singapore.*
-![Singapore Income Grid](images/property_prices.png "Property Price Visualization")
-*Figure 2: Visualization of mean property price per square meter from HDB and private properties in Singapore.*
+*Visualization of estimated income distribution based on property prices over a 50m x 50m grid for Singapore.*
+<!-- ![Singapore Income Grid](images/property_prices.png "Property Price Visualization")
+*Figure 2: Visualization of mean property price per square meter from HDB and private properties in Singapore.* -->
 
 ---
 
