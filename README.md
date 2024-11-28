@@ -26,7 +26,7 @@ Contains income distributions at the planning area level. Each planning area has
 ---
 
 ### **2. Population Density Data (`population_density.csv`)**
-High-resolution dataset (~90,000 rows) containing latitude/longitude and associated population density.
+High-resolution dataset (~70,000 rows) containing latitude/longitude and associated population density.
 
 **Example:**
 | Lat      | Lon      | Population Density |
